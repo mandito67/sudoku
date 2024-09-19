@@ -179,94 +179,259 @@ class SudokuState extends State<Sudoku> {
   }
 
   void cargarNumeros() {
-    while (!tablero_ok) {
+    while (numeros.length < 46) {
       generarTablero();
-
-      setState(() {
-        tablero_ok = validar_solucion();
-      });
     }
+    setState(() {
+      tablero_ok = validar_solucion();
+    });
   }
 
   void generarTablero() {
     Map<int, int> nums = {};
-    List<int> base = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    //1 cuadrante
-    List<int> aleatorios = base..shuffle();
-    int q = 0;
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        nums[i * 10 + j] = aleatorios[q];
-        q++;
+    try {
+      List<int> base = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+      //1 cuadrante
+      List<int> aleatorios = base..shuffle();
+      int q = 0;
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          nums[i * 10 + j] = aleatorios[q];
+          q++;
+        }
       }
-    }
 
-    //2 cuadrante
-    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
-    aleatorios.remove(nums[0]);
-    aleatorios.remove(nums[1]);
-    aleatorios.remove(nums[2]);
-    nums[3] = aleatorios[0];
-    nums[4] = aleatorios[1];
-    nums[5] = aleatorios[2];
-    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
-    aleatorios.remove(nums[3]);
-    aleatorios.remove(nums[4]);
-    aleatorios.remove(nums[5]);
-    aleatorios.remove(nums[10]);
-    aleatorios.remove(nums[11]);
-    aleatorios.remove(nums[12]);
-    nums[13] = aleatorios[0];
-    nums[14] = aleatorios[1];
-    nums[15] = aleatorios[2];
-    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
-    aleatorios.remove(nums[3]);
-    aleatorios.remove(nums[4]);
-    aleatorios.remove(nums[5]);
-    aleatorios.remove(nums[13]);
-    aleatorios.remove(nums[14]);
-    aleatorios.remove(nums[15]);
-    aleatorios.remove(nums[20]);
-    aleatorios.remove(nums[21]);
-    aleatorios.remove(nums[22]);
-    nums[23] = aleatorios[0];
-    nums[24] = aleatorios[1];
-    nums[25] = aleatorios[2];
-    //3 cuadrante
-    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
-    aleatorios.remove(nums[0]);
-    aleatorios.remove(nums[1]);
-    aleatorios.remove(nums[2]);
-    aleatorios.remove(nums[3]);
-    aleatorios.remove(nums[4]);
-    aleatorios.remove(nums[5]);
-    nums[6] = aleatorios[0];
-    nums[7] = aleatorios[1];
-    nums[8] = aleatorios[2];
-    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
-    aleatorios.remove(nums[6]);
-    aleatorios.remove(nums[7]);
-    aleatorios.remove(nums[8]);
-    aleatorios.remove(nums[10]);
-    aleatorios.remove(nums[11]);
-    aleatorios.remove(nums[12]);
-    aleatorios.remove(nums[13]);
-    aleatorios.remove(nums[14]);
-    aleatorios.remove(nums[15]);
-    nums[16] = aleatorios[0];
-    nums[17] = aleatorios[1];
-    nums[18] = aleatorios[2];
-    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
-    aleatorios.remove(nums[6]);
-    aleatorios.remove(nums[7]);
-    aleatorios.remove(nums[8]);
-    aleatorios.remove(nums[16]);
-    aleatorios.remove(nums[17]);
-    aleatorios.remove(nums[18]);
-    nums[26] = aleatorios[0];
-    nums[27] = aleatorios[1];
-    nums[28] = aleatorios[2];
+      //2 cuadrante
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[0]);
+      aleatorios.remove(nums[1]);
+      aleatorios.remove(nums[2]);
+      nums[3] = aleatorios[0];
+      nums[4] = aleatorios[1];
+      nums[5] = aleatorios[2];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[3]);
+      aleatorios.remove(nums[4]);
+      aleatorios.remove(nums[5]);
+      aleatorios.remove(nums[10]);
+      aleatorios.remove(nums[11]);
+      aleatorios.remove(nums[12]);
+      nums[13] = aleatorios[0];
+      nums[14] = aleatorios[1];
+      nums[15] = aleatorios[2];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[3]);
+      aleatorios.remove(nums[4]);
+      aleatorios.remove(nums[5]);
+      aleatorios.remove(nums[13]);
+      aleatorios.remove(nums[14]);
+      aleatorios.remove(nums[15]);
+      aleatorios.remove(nums[20]);
+      aleatorios.remove(nums[21]);
+      aleatorios.remove(nums[22]);
+      nums[23] = aleatorios[0];
+      nums[24] = aleatorios[1];
+      nums[25] = aleatorios[2];
+      //3 cuadrante
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[0]);
+      aleatorios.remove(nums[1]);
+      aleatorios.remove(nums[2]);
+      aleatorios.remove(nums[3]);
+      aleatorios.remove(nums[4]);
+      aleatorios.remove(nums[5]);
+      nums[6] = aleatorios[0];
+      nums[7] = aleatorios[1];
+      nums[8] = aleatorios[2];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[6]);
+      aleatorios.remove(nums[7]);
+      aleatorios.remove(nums[8]);
+      aleatorios.remove(nums[10]);
+      aleatorios.remove(nums[11]);
+      aleatorios.remove(nums[12]);
+      aleatorios.remove(nums[13]);
+      aleatorios.remove(nums[14]);
+      aleatorios.remove(nums[15]);
+      nums[16] = aleatorios[0];
+      nums[17] = aleatorios[1];
+      nums[18] = aleatorios[2];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[6]);
+      aleatorios.remove(nums[7]);
+      aleatorios.remove(nums[8]);
+      aleatorios.remove(nums[16]);
+      aleatorios.remove(nums[17]);
+      aleatorios.remove(nums[18]);
+      nums[26] = aleatorios[0];
+      nums[27] = aleatorios[1];
+      nums[28] = aleatorios[2];
 
+      //4 cuadrante
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[0]);
+      aleatorios.remove(nums[10]);
+      aleatorios.remove(nums[20]);
+      nums[30] = aleatorios[0];
+      nums[40] = aleatorios[1];
+      nums[50] = aleatorios[2];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[1]);
+      aleatorios.remove(nums[11]);
+      aleatorios.remove(nums[21]);
+      aleatorios.remove(nums[30]);
+      aleatorios.remove(nums[40]);
+      aleatorios.remove(nums[50]);
+      nums[31] = aleatorios[0];
+      nums[41] = aleatorios[1];
+      nums[51] = aleatorios[2];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[30]);
+      aleatorios.remove(nums[40]);
+      aleatorios.remove(nums[50]);
+      aleatorios.remove(nums[31]);
+      aleatorios.remove(nums[41]);
+      aleatorios.remove(nums[51]);
+      nums[32] = aleatorios[0];
+      nums[42] = aleatorios[1];
+      nums[52] = aleatorios[2];
+      //7 cuadrante
+
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[0]);
+      aleatorios.remove(nums[10]);
+      aleatorios.remove(nums[20]);
+      aleatorios.remove(nums[30]);
+      aleatorios.remove(nums[40]);
+      aleatorios.remove(nums[50]);
+      nums[60] = aleatorios[0];
+      nums[70] = aleatorios[1];
+      nums[80] = aleatorios[2];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[1]);
+      aleatorios.remove(nums[11]);
+      aleatorios.remove(nums[21]);
+      aleatorios.remove(nums[31]);
+      aleatorios.remove(nums[41]);
+      aleatorios.remove(nums[51]);
+      nums[61] = aleatorios[0];
+      nums[71] = aleatorios[1];
+      nums[81] = aleatorios[2];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[60]);
+      aleatorios.remove(nums[70]);
+      aleatorios.remove(nums[80]);
+      aleatorios.remove(nums[61]);
+      aleatorios.remove(nums[71]);
+      aleatorios.remove(nums[81]);
+      nums[62] = aleatorios[0];
+      nums[72] = aleatorios[1];
+      nums[82] = aleatorios[2];
+      //5 cuadrante
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[30]);
+      aleatorios.remove(nums[31]);
+      aleatorios.remove(nums[32]);
+      aleatorios.remove(nums[3]);
+      aleatorios.remove(nums[13]);
+      aleatorios.remove(nums[23]);
+      nums[33] = aleatorios[0];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[30]);
+      aleatorios.remove(nums[31]);
+      aleatorios.remove(nums[32]);
+      aleatorios.remove(nums[33]);
+      aleatorios.remove(nums[4]);
+      aleatorios.remove(nums[14]);
+      aleatorios.remove(nums[24]);
+      nums[34] = aleatorios[0];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[30]);
+      aleatorios.remove(nums[31]);
+      aleatorios.remove(nums[32]);
+      aleatorios.remove(nums[33]);
+      aleatorios.remove(nums[34]);
+      aleatorios.remove(nums[5]);
+      aleatorios.remove(nums[15]);
+      aleatorios.remove(nums[25]);
+      nums[35] = aleatorios[0];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[40]);
+      aleatorios.remove(nums[41]);
+      aleatorios.remove(nums[42]);
+      aleatorios.remove(nums[3]);
+      aleatorios.remove(nums[13]);
+      aleatorios.remove(nums[23]);
+      aleatorios.remove(nums[33]);
+      aleatorios.remove(nums[34]);
+      aleatorios.remove(nums[35]);
+      nums[43] = aleatorios[0];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[40]);
+      aleatorios.remove(nums[41]);
+      aleatorios.remove(nums[42]);
+      aleatorios.remove(nums[43]);
+      aleatorios.remove(nums[4]);
+      aleatorios.remove(nums[14]);
+      aleatorios.remove(nums[24]);
+      aleatorios.remove(nums[33]);
+      aleatorios.remove(nums[34]);
+      aleatorios.remove(nums[35]);
+      nums[44] = aleatorios[0];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[40]);
+      aleatorios.remove(nums[41]);
+      aleatorios.remove(nums[42]);
+      aleatorios.remove(nums[43]);
+      aleatorios.remove(nums[44]);
+      aleatorios.remove(nums[5]);
+      aleatorios.remove(nums[15]);
+      aleatorios.remove(nums[25]);
+      aleatorios.remove(nums[33]);
+      aleatorios.remove(nums[34]);
+      aleatorios.remove(nums[35]);
+      nums[45] = aleatorios[0];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[50]);
+      aleatorios.remove(nums[51]);
+      aleatorios.remove(nums[52]);
+      aleatorios.remove(nums[3]);
+      aleatorios.remove(nums[13]);
+      aleatorios.remove(nums[23]);
+      aleatorios.remove(nums[33]);
+      aleatorios.remove(nums[34]);
+      aleatorios.remove(nums[35]);
+      aleatorios.remove(nums[43]);
+      aleatorios.remove(nums[44]);
+      aleatorios.remove(nums[45]);
+      nums[53] = aleatorios[0];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+      aleatorios.remove(nums[50]);
+      aleatorios.remove(nums[51]);
+      aleatorios.remove(nums[52]);
+      aleatorios.remove(nums[53]);
+      aleatorios.remove(nums[4]);
+      aleatorios.remove(nums[14]);
+      aleatorios.remove(nums[24]);
+      aleatorios.remove(nums[33]);
+      aleatorios.remove(nums[34]);
+      aleatorios.remove(nums[35]);
+      aleatorios.remove(nums[43]);
+      aleatorios.remove(nums[44]);
+      aleatorios.remove(nums[45]);
+      nums[54] = aleatorios[0];
+      aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+
+      aleatorios.remove(nums[33]);
+      aleatorios.remove(nums[34]);
+      aleatorios.remove(nums[35]);
+      aleatorios.remove(nums[43]);
+      aleatorios.remove(nums[44]);
+      aleatorios.remove(nums[45]);
+      aleatorios.remove(nums[53]);
+      aleatorios.remove(nums[54]);
+      nums[55] = aleatorios[0];
+    } catch (e) {}
     setState(() {
       numeros = nums;
     });
