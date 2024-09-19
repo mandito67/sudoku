@@ -168,6 +168,9 @@ class SudokuState extends State<Sudoku> {
                 )),
             ElevatedButton(
               onPressed: () {
+                setState(() {
+                  numeros = {};
+                });
                 cargarNumeros();
               },
               child: const Text('Reiniciar'),
@@ -179,7 +182,7 @@ class SudokuState extends State<Sudoku> {
   }
 
   void cargarNumeros() {
-    while (numeros.length < 46) {
+    while (numeros.length < 54) {
       generarTablero();
     }
     setState(() {
