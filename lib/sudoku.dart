@@ -17,8 +17,31 @@ const background = Color.fromARGB(255, 139, 139, 139);
 class SudokuState extends State<Sudoku> {
   int timer = 0;
 
+  List<int> col0 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  List<int> col1 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  List<int> col2 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  List<int> col3 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  List<int> col4 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  List<int> col5 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  List<int> col6 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  List<int> col7 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  List<int> col8 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+  List<List<int>> cuadrantes = [
+    [1, 1, 1, 2, 2, 2, 3, 3, 3],
+    [1, 1, 1, 2, 2, 2, 3, 3, 3],
+    [1, 1, 1, 2, 2, 2, 3, 3, 3],
+    [4, 4, 4, 5, 5, 5, 6, 6, 6],
+    [4, 4, 4, 5, 5, 5, 6, 6, 6],
+    [4, 4, 4, 5, 5, 5, 6, 6, 6],
+    [7, 7, 7, 8, 8, 8, 9, 9, 9],
+    [7, 7, 7, 8, 8, 8, 9, 9, 9],
+    [7, 7, 7, 8, 8, 8, 9, 9, 9],
+  ];
+
   Map<int, int> numeros = {};
   int boton_activo = 1;
+  bool tablero_ok = false;
 
   @override
   void initState() {
@@ -37,6 +60,7 @@ class SudokuState extends State<Sudoku> {
       body: Center(
         child: Column(
           children: [
+            Text('validacion: ' + tablero_ok.toString()),
             Padding(
               padding: const EdgeInsets.all(10),
               child: Container(
@@ -141,7 +165,13 @@ class SudokuState extends State<Sudoku> {
                       ),
                     ]
                   ],
-                ))
+                )),
+            ElevatedButton(
+              onPressed: () {
+                cargarNumeros();
+              },
+              child: const Text('Reiniciar'),
+            )
           ],
         ),
       ),
@@ -149,22 +179,184 @@ class SudokuState extends State<Sudoku> {
   }
 
   void cargarNumeros() {
+    while (!tablero_ok) {
+      generarTablero();
+
+      setState(() {
+        tablero_ok = validar_solucion();
+      });
+    }
+  }
+
+  void generarTablero() {
+    Map<int, int> nums = {};
+    List<int> base = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    //1 cuadrante
+    List<int> aleatorios = base..shuffle();
+    int q = 0;
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        nums[i * 10 + j] = aleatorios[q];
+        q++;
+      }
+    }
+
+    //2 cuadrante
+    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+    aleatorios.remove(nums[0]);
+    aleatorios.remove(nums[1]);
+    aleatorios.remove(nums[2]);
+    nums[3] = aleatorios[0];
+    nums[4] = aleatorios[1];
+    nums[5] = aleatorios[2];
+    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+    aleatorios.remove(nums[3]);
+    aleatorios.remove(nums[4]);
+    aleatorios.remove(nums[5]);
+    aleatorios.remove(nums[10]);
+    aleatorios.remove(nums[11]);
+    aleatorios.remove(nums[12]);
+    nums[13] = aleatorios[0];
+    nums[14] = aleatorios[1];
+    nums[15] = aleatorios[2];
+    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+    aleatorios.remove(nums[3]);
+    aleatorios.remove(nums[4]);
+    aleatorios.remove(nums[5]);
+    aleatorios.remove(nums[13]);
+    aleatorios.remove(nums[14]);
+    aleatorios.remove(nums[15]);
+    aleatorios.remove(nums[20]);
+    aleatorios.remove(nums[21]);
+    aleatorios.remove(nums[22]);
+    nums[23] = aleatorios[0];
+    nums[24] = aleatorios[1];
+    nums[25] = aleatorios[2];
+    //3 cuadrante
+    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+    aleatorios.remove(nums[0]);
+    aleatorios.remove(nums[1]);
+    aleatorios.remove(nums[2]);
+    aleatorios.remove(nums[3]);
+    aleatorios.remove(nums[4]);
+    aleatorios.remove(nums[5]);
+    nums[6] = aleatorios[0];
+    nums[7] = aleatorios[1];
+    nums[8] = aleatorios[2];
+    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+    aleatorios.remove(nums[6]);
+    aleatorios.remove(nums[7]);
+    aleatorios.remove(nums[8]);
+    aleatorios.remove(nums[10]);
+    aleatorios.remove(nums[11]);
+    aleatorios.remove(nums[12]);
+    aleatorios.remove(nums[13]);
+    aleatorios.remove(nums[14]);
+    aleatorios.remove(nums[15]);
+    nums[16] = aleatorios[0];
+    nums[17] = aleatorios[1];
+    nums[18] = aleatorios[2];
+    aleatorios = [1, 2, 3, 4, 5, 6, 7, 8, 9]..shuffle();
+    aleatorios.remove(nums[6]);
+    aleatorios.remove(nums[7]);
+    aleatorios.remove(nums[8]);
+    aleatorios.remove(nums[16]);
+    aleatorios.remove(nums[17]);
+    aleatorios.remove(nums[18]);
+    nums[26] = aleatorios[0];
+    nums[27] = aleatorios[1];
+    nums[28] = aleatorios[2];
+
+    setState(() {
+      numeros = nums;
+    });
+  }
+
+  bool validar_solucion() {
+    bool ok = true;
+    //revisa filas
+    for (int i = 0; i < 9; i++) {
+      List<int> check = [];
+      for (int j = 0; j < 9; j++) {
+        if (numeros[i * 10 + j] != null) {
+          check.add(numeros[i * 10 + j]!);
+        }
+        print(check);
+        var distinctIds = check.toSet().toList();
+        print(distinctIds);
+        if (check.length != distinctIds.length) {
+          ok = false;
+          break;
+        }
+      }
+    }
+    return ok;
+  }
+
+  void cargarNumeros_op1() {
     Map<int, int> nums = {};
     List<int> base = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     for (int i = 0; i < 9; i++) {
-      bool buscar_siguiente = true;
+      //i es la fila
       List<int> aleatorios = [];
+      bool buscar_siguiente = true;
       while (buscar_siguiente) {
         buscar_siguiente = false;
-        aleatorios = base..shuffle();
+        if (i < 7) {
+          aleatorios = base..shuffle();
+        } else {
+          List<int> ali0 = col0..shuffle();
+          List<int> ali1 = col1..shuffle();
+          List<int> ali2 = col2..shuffle();
+          List<int> ali3 = col3..shuffle();
+          List<int> ali4 = col4..shuffle();
+          List<int> ali5 = col5..shuffle();
+          List<int> ali6 = col6..shuffle();
+          List<int> ali7 = col7..shuffle();
+          List<int> ali8 = col8..shuffle();
+          aleatorios = [
+            ali0[0],
+            ali1[0],
+            ali2[0],
+            ali3[0],
+            ali4[0],
+            ali5[0],
+            ali6[0],
+            ali7[0],
+            ali8[0]
+          ];
+        }
+        print(aleatorios);
+
+        print('probando...');
+        print(aleatorios);
         for (int j = 0; j < 9; j++) {
+          int cuadrantei = cuadrantes[i][j];
+          print(cuadrantei);
+          //j es la columna
           for (int k = 0; k < i; k++) {
-            if (aleatorios[j] == numeros[k * 10 + j]) {
+            //k son las lineas hasta donde va i
+            if (aleatorios[j] == nums[k * 10 + j]) {
+              //valida que no coincida en la misma columna
               buscar_siguiente = true;
+              break;
+            } else if (j >= 0 && j < 4) {
+              //primer cuadrante
             }
           }
         }
       }
+      col0.remove(aleatorios[0]);
+      col1.remove(aleatorios[1]);
+      col2.remove(aleatorios[2]);
+      col3.remove(aleatorios[3]);
+      col4.remove(aleatorios[4]);
+      col5.remove(aleatorios[5]);
+      col6.remove(aleatorios[6]);
+      col7.remove(aleatorios[7]);
+      col8.remove(aleatorios[8]);
+      print('pintando linea $i');
+      print(aleatorios);
       for (int j = 0; j < 9; j++) {
         nums[i * 10 + j] = aleatorios[j];
       }
