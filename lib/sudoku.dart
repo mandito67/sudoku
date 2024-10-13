@@ -19,8 +19,91 @@ const background = Color.fromARGB(255, 139, 139, 139);
 class SudokuState extends State<Sudoku> {
   int timer = 0;
   bool isLoading = true;
+  ValueNotifier<int> nivel = ValueNotifier<int>(0);
 
-  Map<int, int> numeros = {};
+  Map<int, int> numeros = {
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+    7: 0,
+    8: 0,
+    10: 0,
+    11: 0,
+    12: 0,
+    13: 0,
+    14: 0,
+    15: 0,
+    16: 0,
+    17: 0,
+    18: 0,
+    20: 0,
+    21: 0,
+    22: 0,
+    23: 0,
+    24: 0,
+    25: 0,
+    26: 0,
+    27: 0,
+    28: 0,
+    30: 0,
+    31: 0,
+    32: 0,
+    33: 0,
+    34: 0,
+    35: 0,
+    36: 0,
+    37: 0,
+    38: 0,
+    40: 0,
+    41: 0,
+    42: 0,
+    43: 0,
+    44: 0,
+    45: 0,
+    46: 0,
+    47: 0,
+    48: 0,
+    50: 0,
+    51: 0,
+    52: 0,
+    53: 0,
+    54: 0,
+    55: 0,
+    56: 0,
+    57: 0,
+    58: 0,
+    60: 0,
+    61: 0,
+    62: 0,
+    63: 0,
+    64: 0,
+    65: 0,
+    66: 0,
+    67: 0,
+    68: 0,
+    70: 0,
+    71: 0,
+    72: 0,
+    73: 0,
+    74: 0,
+    75: 0,
+    76: 0,
+    77: 0,
+    78: 0,
+    80: 0,
+    81: 0,
+    82: 0,
+    83: 0,
+    84: 0,
+    85: 0,
+    86: 0,
+    87: 0,
+    88: 0
+  };
   List<int> celdas_ocultas = [];
   int boton_activo = 1;
   int boton_activo_fijo = -1;
@@ -31,11 +114,12 @@ class SudokuState extends State<Sudoku> {
   @override
   void initState() {
     super.initState();
-    cargarNumeros();
+    nivel.addListener(() async => cargarNumeros());
   }
 
   @override
   Widget build(BuildContext context) {
+    nivel.value = ModalRoute.of(context)!.settings.arguments as int;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sudoku'),
@@ -44,31 +128,47 @@ class SudokuState extends State<Sudoku> {
       ),
       body: Center(
         child: Column(children: [
+          Text('activo $boton_activo fijo $boton_activo_fijo'),
+          Text(
+              'Nivel: ${nivel.value == 1 ? 'Fácil' : nivel.value == 2 ? 'Intermedio' : 'Duro'}',
+              style: const TextStyle(fontSize: 20)),
           if (terminado) ...[
             const Padding(
               padding: EdgeInsets.all(20),
               child: Text('Felicidades!!!', style: TextStyle(fontSize: 30)),
-            )
+            ),
+          ],
+          if (isLoading) ...[
+            const SizedBox(
+                height: 350,
+                width: 350,
+                child: Padding(
+                  padding: EdgeInsets.all(100),
+                  child: CircularProgressIndicator(),
+                ))
           ] else ...[
-            if (isLoading) ...[
-              const SizedBox(
-                  height: 350,
-                  width: 350,
-                  child: Padding(
-                    padding: EdgeInsets.all(100),
-                    child: CircularProgressIndicator(),
-                  ))
-            ] else ...[
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Container(
-                  height: 350,
-                  width: 350,
-                  color: background,
-                  child: LayoutGrid(
-                    columnGap: 2,
-                    rowGap: 2,
-                    areas: '''
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: tablero(),
+            ),
+            botones()
+          ],
+          const SizedBox(height: 20),
+          opciones(),
+        ]),
+      ),
+    );
+  }
+
+  Widget tablero() {
+    return Container(
+      height: 350,
+      width: 350,
+      color: background,
+      child: LayoutGrid(
+        columnGap: 2,
+        rowGap: 2,
+        areas: '''
                                 c00 c01 c02 c03 c04 c05 c06 c07 c08
                                 c10 c11 c12 c13 c14 c15 c16 c17 c18
                                 c20 c21 c22 c23 c24 c25 c26 c27 c28
@@ -79,161 +179,171 @@ class SudokuState extends State<Sudoku> {
                                 c70 c71 c72 c73 c74 c75 c76 c77 c78
                                 c80 c81 c82 c83 c84 c85 c86 c87 c88 
                               ''',
-                    // A number of extension methods are provided for concise track sizing
-                    columnSizes: [
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px
-                    ],
-                    rowSizes: [
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px,
-                      37.0.px
-                    ],
-                    children: [
-                      for (int i = 0; i < 9; i++) ...[
-                        for (int j = 0; j < 9; j++) ...[
-                          gridArea('c$i$j').containing(
-                            GestureDetector(
-                              onTap: () {
-                                if (celdas_ocultas.contains(i * 10 + j)) {
-                                  setState(() {
-                                    numeros[i * 10 + j] = boton_activo;
-                                  });
-                                  checkCompleto();
-                                }
-                              },
-                              child: Container(
-                                  width: 42,
-                                  height: 42,
-                                  color:
-                                      numeros[i * 10 + j] == boton_activo_fijo
-                                          ? Colors.blue
-                                          : (((i > 2 && i < 6) ||
-                                                      (j > 2 && j < 6)) &&
-                                                  ((i > 2 && i < 6) !=
-                                                      (j > 2 && j < 6)))
-                                              ? cellGreyDark
-                                              : cellGreyLight,
-                                  child: Center(
-                                      child: Text(
-                                          numeros[i * 10 + j]! > 0
-                                              ? numeros[i * 10 + j].toString()
-                                              : '',
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: celdas_ocultas
-                                                      .contains(i * 10 + j)
-                                                  ? FontWeight.bold
-                                                  : numeros[i * 10 + j] ==
-                                                          boton_activo_fijo
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                              color: celdas_ocultas
-                                                      .contains(i * 10 + j)
-                                                  ? Colors.green
-                                                  : Colors.black)))),
-                            ),
-                          ),
-                        ]
-                      ]
-                    ],
-                  ),
+        // A number of extension methods are provided for concise track sizing
+        columnSizes: [
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px
+        ],
+        rowSizes: [
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px,
+          37.0.px
+        ],
+        children: [
+          for (int i = 0; i < 9; i++) ...[
+            for (int j = 0; j < 9; j++) ...[
+              gridArea('c$i$j').containing(
+                GestureDetector(
+                  onTap: () {
+                    if (celdas_ocultas.contains(i * 10 + j)) {
+                      setState(() {
+                        numeros[i * 10 + j] = boton_activo;
+                      });
+                      checkCompleto();
+                    }
+                  },
+                  child: Container(
+                      width: 42,
+                      height: 42,
+                      color: numeros[i * 10 + j] == boton_activo_fijo
+                          ? Colors.blue
+                          : (((i > 2 && i < 6) || (j > 2 && j < 6)) &&
+                                  ((i > 2 && i < 6) != (j > 2 && j < 6)))
+                              ? cellGreyDark
+                              : cellGreyLight,
+                      child: Center(
+                          child: Text(
+                              numeros[i * 10 + j]! > 0
+                                  ? numeros[i * 10 + j].toString()
+                                  : '',
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: celdas_ocultas
+                                          .contains(i * 10 + j)
+                                      ? FontWeight.bold
+                                      : numeros[i * 10 + j] == boton_activo_fijo
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                  color: celdas_ocultas.contains(i * 10 + j)
+                                      ? const Color.fromARGB(255, 128, 250, 133)
+                                      : numeros[i * 10 + j] == boton_activo_fijo
+                                          ? Colors.white
+                                          : Colors.black)))),
                 ),
               ),
-              Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (int k = 1; k < 10; k++) ...[
-                        Padding(
-                          padding: const EdgeInsets.all(7.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                boton_activo = k;
-                                boton_activo_fijo = -1;
-                              });
-                            },
-                            onLongPress: () {
-                              setState(() {
-                                boton_activo_fijo =
-                                    boton_activo_fijo > -1 ? -1 : k;
-                                boton_activo = k;
-                              });
-                            },
-                            onDoubleTap: () {
-                              setState(() {
-                                boton_activo_fijo =
-                                    boton_activo_fijo > -1 ? -1 : k;
-                                boton_activo = k;
-                              });
-                            },
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              padding: const EdgeInsets.fromLTRB(10, 5, 5, 5),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: boton_activo == k
-                                    ? Colors.blue
-                                    : Colors.green,
-                              ),
-                              child: Text(
-                                k.toString(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ]
-                    ],
-                  )),
             ]
-          ],
-          ElevatedButton(
-            onPressed: () async {
-              setState(() {
-                numeros = {};
-                tablero_ok = false;
-                isLoading = true;
-                terminado = false;
-              });
-              await Future.delayed(const Duration(seconds: 1)).then((onValue) {
-                cargarNumeros();
-              });
-            },
-            child: const Text('Reiniciar'),
-          ),
-        ]),
+          ]
+        ],
       ),
     );
   }
 
-  void cargarNumeros() {
+  Widget botones() {
+    return Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (int k = 1; k < 10; k++) ...[
+              Padding(
+                padding: const EdgeInsets.all(4),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      boton_activo = k;
+                      boton_activo_fijo = boton_activo_fijo == -1 ? -1 : k;
+                    });
+                  },
+                  onLongPress: () {
+                    setState(() {
+                      boton_activo_fijo = boton_activo_fijo > -1 ? -1 : k;
+                      boton_activo = k;
+                    });
+                  },
+                  onDoubleTap: () {
+                    setState(() {
+                      boton_activo_fijo = boton_activo_fijo > -1 ? -1 : k;
+                      boton_activo = k;
+                    });
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    padding: const EdgeInsets.fromLTRB(12, 4, 5, 5),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      color: boton_activo == k ? Colors.blue : Colors.green,
+                    ),
+                    child: Text(
+                      k.toString(),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: boton_activo == k
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: boton_activo == k
+                            ? Colors.white
+                            : const Color.fromARGB(255, 60, 60, 60),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ]
+          ],
+        ));
+  }
+
+  Widget opciones() {
+    return Row(
+      children: [
+        ElevatedButton(
+          onPressed: () async {
+            setState(() {
+              numeros = {};
+              tablero_ok = false;
+              isLoading = true;
+              terminado = false;
+            });
+            await Future.delayed(const Duration(seconds: 1))
+                .then((onValue) async {
+              await cargarNumeros();
+            });
+          },
+          child: const Text('Reiniciar'),
+        )
+      ],
+    );
+  }
+
+  Future<void> cargarNumeros() async {
     intentos = 0;
 
     while (!tablero_ok) {
       intentos++;
+      print("intentos: $intentos");
       generarTablero();
       setState(() {
         tablero_ok = validarSolucion();
       });
+      if (intentos > 1000) {
+        setState(() {
+          tablero_ok = true;
+        });
+      }
     }
     print("total intentos: $intentos");
 
@@ -321,7 +431,14 @@ class SudokuState extends State<Sudoku> {
       87,
       88
     ]..shuffle();
-    List<int> celhid = todos.sublist(0, 10);
+    List<int> celhid = [];
+    if (nivel.value == 1) {
+      celhid = todos.sublist(0, 20);
+    } else if (nivel.value == 2) {
+      celhid = todos.sublist(0, 30);
+    } else if (nivel.value == 3) {
+      celhid = todos.sublist(0, 40);
+    }
     celhid.forEach((co) {
       numeros[co] = 0;
     });
@@ -344,7 +461,8 @@ class SudokuState extends State<Sudoku> {
     List<int> q8 = [63, 64, 65, 73, 74, 75, 83, 84, 85];
     List<int> q9 = [66, 67, 68, 76, 77, 78, 86, 87, 88];
     Random random = Random();
-    base.forEach((num) {
+
+    for (var num in base) {
       try {
         List<int> q1i = List.from(q1);
         List<int> q2i = List.from(q2);
@@ -607,13 +725,7 @@ class SudokuState extends State<Sudoku> {
         numeros[q9i[0]] = num;
         q9.remove(q9i[0]);
       } catch (e) {}
-    });
-
-    setState(() {
-      tablero_ok = true;
-      isLoading = false;
-      numeros = numeros;
-    });
+    }
   }
 
   bool validarSolucion() {
@@ -625,23 +737,24 @@ class SudokuState extends State<Sudoku> {
         if (numeros[i * 10 + j] != null) {
           check_row.add(numeros[i * 10 + j]!);
         }
-        var distinctIds = check_row.toSet().toList();
-        //compara la longitud, si hay un repetido la longitud es diferente
-        if (check_row.length != distinctIds.length) {
-          print(check_row);
-          print(distinctIds);
-          ok = false;
-          break;
-        }
+      }
+      var distinctIds = check_row.toSet().toList();
+      //compara la longitud, si hay un repetido la longitud es diferente
+      print(check_row);
+      print(distinctIds);
+      if (check_row.length != distinctIds.length) {
+        ok = false;
       }
     }
 
-    //revisa columnas
-    for (int i = 0; i < 9; i++) {
-      List<int> check_col = [];
-      for (int j = 0; j < 9; j++) {
-        if (numeros[i + j * 10] != null) {
-          check_col.add(numeros[i + j * 10]!);
+    if (ok) {
+      //revisa columnas
+      for (int i = 0; i < 9; i++) {
+        List<int> check_col = [];
+        for (int j = 0; j < 9; j++) {
+          if (numeros[i + j * 10] != null) {
+            check_col.add(numeros[i + j * 10]!);
+          }
         }
         var distinctIds = check_col.toSet().toList();
         //compara la longitud, si hay un repetido la longitud es diferente
@@ -649,11 +762,11 @@ class SudokuState extends State<Sudoku> {
           print(check_col);
           print(distinctIds);
           ok = false;
-          break;
         }
       }
     }
 
+    numeros.remove(0);
     if (numeros.length < 81) {
       ok = false;
     }
@@ -661,9 +774,16 @@ class SudokuState extends State<Sudoku> {
   }
 
   void checkCompleto() {
+    print('validnado...');
     if (validarSolucion()) {
+      print('validacion ok');
       setState(() {
         terminado = true;
+      });
+    } else {
+      print('faltan campos');
+      setState(() {
+        terminado = false;
       });
     }
   }
