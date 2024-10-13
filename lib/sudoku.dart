@@ -23,6 +23,7 @@ class SudokuState extends State<Sudoku> {
   Map<int, int> numeros = {};
   List<int> celdas_ocultas = [];
   int boton_activo = 1;
+  int boton_activo_fijo = -1;
   bool tablero_ok = false;
   int intentos = 0;
   bool terminado = false;
@@ -108,8 +109,6 @@ class SudokuState extends State<Sudoku> {
                             GestureDetector(
                               onTap: () {
                                 if (celdas_ocultas.contains(i * 10 + j)) {
-                                  print(celdas_ocultas);
-                                  print(i * 10 + j);
                                   setState(() {
                                     numeros[i * 10 + j] = boton_activo;
                                   });
@@ -119,11 +118,15 @@ class SudokuState extends State<Sudoku> {
                               child: Container(
                                   width: 42,
                                   height: 42,
-                                  color: (((i > 2 && i < 6) || (j > 2 && j < 6)) &&
-                                          ((i > 2 && i < 6) !=
-                                              (j > 2 && j < 6)))
-                                      ? cellGreyDark
-                                      : cellGreyLight,
+                                  color:
+                                      numeros[i * 10 + j] == boton_activo_fijo
+                                          ? Colors.blue
+                                          : (((i > 2 && i < 6) ||
+                                                      (j > 2 && j < 6)) &&
+                                                  ((i > 2 && i < 6) !=
+                                                      (j > 2 && j < 6)))
+                                              ? cellGreyDark
+                                              : cellGreyLight,
                                   child: Center(
                                       child: Text(
                                           numeros[i * 10 + j]! > 0
@@ -134,11 +137,14 @@ class SudokuState extends State<Sudoku> {
                                               fontWeight: celdas_ocultas
                                                       .contains(i * 10 + j)
                                                   ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                              color:
-                                                  celdas_ocultas.contains(i * 10 + j)
-                                                      ? Colors.green
-                                                      : Colors.black)))),
+                                                  : numeros[i * 10 + j] ==
+                                                          boton_activo_fijo
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                              color: celdas_ocultas
+                                                      .contains(i * 10 + j)
+                                                  ? Colors.green
+                                                  : Colors.black)))),
                             ),
                           ),
                         ]
@@ -158,6 +164,21 @@ class SudokuState extends State<Sudoku> {
                           child: GestureDetector(
                             onTap: () {
                               setState(() {
+                                boton_activo = k;
+                                boton_activo_fijo = -1;
+                              });
+                            },
+                            onLongPress: () {
+                              setState(() {
+                                boton_activo_fijo =
+                                    boton_activo_fijo > -1 ? -1 : k;
+                                boton_activo = k;
+                              });
+                            },
+                            onDoubleTap: () {
+                              setState(() {
+                                boton_activo_fijo =
+                                    boton_activo_fijo > -1 ? -1 : k;
                                 boton_activo = k;
                               });
                             },
@@ -209,12 +230,10 @@ class SudokuState extends State<Sudoku> {
 
     while (!tablero_ok) {
       intentos++;
-      print("intento: $intentos");
       generarTablero();
       setState(() {
-        tablero_ok = validar_solucion();
+        tablero_ok = validarSolucion();
       });
-      print("------");
     }
     print("total intentos: $intentos");
 
@@ -303,7 +322,6 @@ class SudokuState extends State<Sudoku> {
       88
     ]..shuffle();
     List<int> celhid = todos.sublist(0, 10);
-    print("celdas fijas: $celdas_ocultas");
     celhid.forEach((co) {
       numeros[co] = 0;
     });
@@ -588,17 +606,7 @@ class SudokuState extends State<Sudoku> {
         }
         numeros[q9i[0]] = num;
         q9.remove(q9i[0]);
-      } catch (e) {
-        print(q1);
-        print(q2);
-        print(q3);
-        print(q4);
-        print(q5);
-        print(q6);
-        print(q7);
-        print(q8);
-        print(q9);
-      }
+      } catch (e) {}
     });
 
     setState(() {
@@ -608,17 +616,38 @@ class SudokuState extends State<Sudoku> {
     });
   }
 
-  bool validar_solucion() {
+  bool validarSolucion() {
     bool ok = true;
     //revisa filas
     for (int i = 0; i < 9; i++) {
-      List<int> check = [];
+      List<int> check_row = [];
       for (int j = 0; j < 9; j++) {
         if (numeros[i * 10 + j] != null) {
-          check.add(numeros[i * 10 + j]!);
+          check_row.add(numeros[i * 10 + j]!);
         }
-        var distinctIds = check.toSet().toList();
-        if (check.length != distinctIds.length) {
+        var distinctIds = check_row.toSet().toList();
+        //compara la longitud, si hay un repetido la longitud es diferente
+        if (check_row.length != distinctIds.length) {
+          print(check_row);
+          print(distinctIds);
+          ok = false;
+          break;
+        }
+      }
+    }
+
+    //revisa columnas
+    for (int i = 0; i < 9; i++) {
+      List<int> check_col = [];
+      for (int j = 0; j < 9; j++) {
+        if (numeros[i + j * 10] != null) {
+          check_col.add(numeros[i + j * 10]!);
+        }
+        var distinctIds = check_col.toSet().toList();
+        //compara la longitud, si hay un repetido la longitud es diferente
+        if (check_col.length != distinctIds.length) {
+          print(check_col);
+          print(distinctIds);
           ok = false;
           break;
         }
@@ -632,7 +661,7 @@ class SudokuState extends State<Sudoku> {
   }
 
   void checkCompleto() {
-    if (validar_solucion()) {
+    if (validarSolucion()) {
       setState(() {
         terminado = true;
       });
