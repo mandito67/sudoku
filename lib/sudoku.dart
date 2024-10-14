@@ -547,7 +547,7 @@ class SudokuState extends State<Sudoku> {
     } else if (nivel.value == 2) {
       celhid = todos.sublist(0, 30); //51 pistas
     } else if (nivel.value == 3) {
-      celhid = todos.sublist(0, 50); //31 pistas
+      celhid = todos.sublist(0, 45); //46 pistas
     }
     celhid.forEach((co) {
       numeros[co] = 0;
