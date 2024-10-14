@@ -115,6 +115,17 @@ class SudokuState extends State<Sudoku> {
   bool terminado = false;
   bool en_pausa = false;
   bool borrando = false;
+  List<bool> botones_completos = [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ];
 
   @override
   void initState() {
@@ -253,7 +264,8 @@ class SudokuState extends State<Sudoku> {
                   child: Container(
                       width: 42,
                       height: 42,
-                      color: numeros[i * 10 + j] == boton_activo_fijo
+                      color: (numeros[i * 10 + j] == boton_activo_fijo &&
+                              !en_pausa)
                           ? Colors.blue
                           : (((i > 2 && i < 6) || (j > 2 && j < 6)) &&
                                   ((i > 2 && i < 6) != (j > 2 && j < 6)))
@@ -268,22 +280,26 @@ class SudokuState extends State<Sudoku> {
                                       : '',
                               style: TextStyle(
                                   fontSize: 20,
-                                  fontWeight: celdas_ocultas
-                                          .contains(i * 10 + j)
-                                      ? FontWeight.bold
-                                      : numeros[i * 10 + j] == boton_activo_fijo
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                  color: correcto[i * 10 + j] !=
-                                          numeros[i * 10 + j]
-                                      ? Colors.red
+                                  fontWeight: en_pausa
+                                      ? FontWeight.normal
                                       : celdas_ocultas.contains(i * 10 + j)
-                                          ? const Color.fromARGB(
-                                              255, 128, 250, 133)
+                                          ? FontWeight.bold
                                           : numeros[i * 10 + j] ==
                                                   boton_activo_fijo
-                                              ? Colors.white
-                                              : Colors.black)))),
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                  color: en_pausa
+                                      ? Colors.black
+                                      : correcto[i * 10 + j] !=
+                                              numeros[i * 10 + j]
+                                          ? Colors.red
+                                          : celdas_ocultas.contains(i * 10 + j)
+                                              ? const Color.fromARGB(
+                                                  255, 128, 250, 133)
+                                              : numeros[i * 10 + j] ==
+                                                      boton_activo_fijo
+                                                  ? Colors.white
+                                                  : Colors.black)))),
                 ),
               ),
             ]
@@ -333,7 +349,11 @@ class SudokuState extends State<Sudoku> {
                     padding: const EdgeInsets.fromLTRB(9, 2, 5, 5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
-                      color: boton_activo == k ? Colors.blue : Colors.green,
+                      color: boton_activo == k
+                          ? Colors.blue
+                          : botones_completos[k - 1]
+                              ? Colors.grey
+                              : Colors.green,
                     ),
                     child: Text(
                       k.toString(),
@@ -532,6 +552,7 @@ class SudokuState extends State<Sudoku> {
     celhid.forEach((co) {
       numeros[co] = 0;
     });
+    checkCompleto();
     setState(() {
       isLoading = false;
       celdas_ocultas = celhid;
@@ -637,6 +658,35 @@ class SudokuState extends State<Sudoku> {
 
   bool checkCompleto() {
     print('checkCompleto');
+
+    //chequea si los numeros estan completos
+    Map<int, int> contador = {
+      0: 0,
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0
+    };
+    for (int i in numeros.keys) {
+      int num = numeros[i]!;
+      contador[num] = contador[num]! + 1;
+    }
+    for (int i = 1; i <= 9; i++) {
+      if (contador[i] == 9) {
+        botones_completos[i - 1] = true;
+      } else {
+        botones_completos[i - 1] = false;
+      }
+    }
+    print(contador);
+    print(botones_completos);
+
+    //inicia contador con el primer numero
     if (!stopwatch.isRunning) {
       stopwatch.start();
     }
