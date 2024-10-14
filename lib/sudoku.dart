@@ -16,6 +16,7 @@ const cellGreyLight = Color.fromARGB(255, 157, 162, 172);
 const cellGreyDark = Color.fromARGB(255, 98, 100, 103);
 const cellBlue = Color(0xff1553be);
 const background = Color.fromARGB(255, 139, 139, 139);
+const colorBotones = Color.fromARGB(255, 154, 159, 165);
 
 class SudokuState extends State<Sudoku> {
   bool isLoading = true;
@@ -112,13 +113,14 @@ class SudokuState extends State<Sudoku> {
   bool tablero_ok = false;
   int intentos = 0;
   bool terminado = false;
+  bool en_pausa = false;
 
   @override
   void initState() {
     super.initState();
     nivel.addListener(() async => cargarNumeros());
     stopwatch = Stopwatch();
-    t = Timer.periodic(Duration(milliseconds: 500), (timer) {
+    t = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       setState(() {});
     });
   }
@@ -152,7 +154,7 @@ class SudokuState extends State<Sudoku> {
               )),
           if (terminado) ...[
             const Padding(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(10),
               child: Text('Felicidades!!!', style: TextStyle(fontSize: 30)),
             ),
           ],
@@ -187,16 +189,16 @@ class SudokuState extends State<Sudoku> {
         columnGap: 2,
         rowGap: 2,
         areas: '''
-                                c00 c01 c02 c03 c04 c05 c06 c07 c08
-                                c10 c11 c12 c13 c14 c15 c16 c17 c18
-                                c20 c21 c22 c23 c24 c25 c26 c27 c28
-                                c30 c31 c32 c33 c34 c35 c36 c37 c38
-                                c40 c41 c42 c43 c44 c45 c46 c47 c48
-                                c50 c51 c52 c53 c54 c55 c56 c57 c58
-                                c60 c61 c62 c63 c64 c65 c66 c67 c68
-                                c70 c71 c72 c73 c74 c75 c76 c77 c78
-                                c80 c81 c82 c83 c84 c85 c86 c87 c88 
-                              ''',
+          c00 c01 c02 c03 c04 c05 c06 c07 c08
+          c10 c11 c12 c13 c14 c15 c16 c17 c18
+          c20 c21 c22 c23 c24 c25 c26 c27 c28
+          c30 c31 c32 c33 c34 c35 c36 c37 c38
+          c40 c41 c42 c43 c44 c45 c46 c47 c48
+          c50 c51 c52 c53 c54 c55 c56 c57 c58
+          c60 c61 c62 c63 c64 c65 c66 c67 c68
+          c70 c71 c72 c73 c74 c75 c76 c77 c78
+          c80 c81 c82 c83 c84 c85 c86 c87 c88 
+        ''',
         // A number of extension methods are provided for concise track sizing
         columnSizes: [
           37.0.px,
@@ -246,9 +248,11 @@ class SudokuState extends State<Sudoku> {
                               : cellGreyLight,
                       child: Center(
                           child: Text(
-                              numeros[i * 10 + j]! > 0
-                                  ? numeros[i * 10 + j].toString()
-                                  : '',
+                              en_pausa
+                                  ? "#"
+                                  : numeros[i * 10 + j]! > 0
+                                      ? numeros[i * 10 + j].toString()
+                                      : '',
                               style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: celdas_ocultas
@@ -282,22 +286,28 @@ class SudokuState extends State<Sudoku> {
                 padding: const EdgeInsets.all(4),
                 child: GestureDetector(
                   onTap: () {
-                    setState(() {
-                      boton_activo = k;
-                      boton_activo_fijo = boton_activo_fijo == -1 ? -1 : k;
-                    });
+                    if (!en_pausa) {
+                      setState(() {
+                        boton_activo = k;
+                        boton_activo_fijo = boton_activo_fijo == -1 ? -1 : k;
+                      });
+                    }
                   },
                   onLongPress: () {
-                    setState(() {
-                      boton_activo_fijo = boton_activo_fijo > -1 ? -1 : k;
-                      boton_activo = k;
-                    });
+                    if (!en_pausa) {
+                      setState(() {
+                        boton_activo_fijo = boton_activo_fijo > -1 ? -1 : k;
+                        boton_activo = k;
+                      });
+                    }
                   },
                   onDoubleTap: () {
-                    setState(() {
-                      boton_activo_fijo = boton_activo_fijo > -1 ? -1 : k;
-                      boton_activo = k;
-                    });
+                    if (!en_pausa) {
+                      setState(() {
+                        boton_activo_fijo = boton_activo_fijo > -1 ? -1 : k;
+                        boton_activo = k;
+                      });
+                    }
                   },
                   child: Container(
                     width: 30,
@@ -329,8 +339,14 @@ class SudokuState extends State<Sudoku> {
 
   Widget opciones() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ElevatedButton(
+        IconButton(
+          style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll<Color>(
+            colorBotones,
+          )),
+          icon: const Icon(Icons.refresh),
           onPressed: () async {
             setState(() {
               numeros = {};
@@ -343,7 +359,23 @@ class SudokuState extends State<Sudoku> {
               await cargarNumeros();
             });
           },
-          child: const Text('Reiniciar'),
+        ),
+        IconButton(
+          style: const ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll<Color>(
+            colorBotones,
+          )),
+          icon: Icon(en_pausa ? Icons.play_arrow : Icons.pause),
+          onPressed: () async {
+            if (stopwatch.isRunning) {
+              stopwatch.stop();
+            } else {
+              stopwatch.start();
+            }
+            setState(() {
+              en_pausa = !en_pausa;
+            });
+          },
         )
       ],
     );
