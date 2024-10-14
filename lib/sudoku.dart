@@ -107,6 +107,7 @@ class SudokuState extends State<Sudoku> {
     87: 0,
     88: 0
   };
+  Map<int, int> correcto = {};
   List<int> celdas_ocultas = [];
   int boton_activo = 1;
   int boton_activo_fijo = -1;
@@ -114,6 +115,7 @@ class SudokuState extends State<Sudoku> {
   int intentos = 0;
   bool terminado = false;
   bool en_pausa = false;
+  bool borrando = false;
 
   @override
   void initState() {
@@ -141,42 +143,54 @@ class SudokuState extends State<Sudoku> {
         centerTitle: true,
       ),
       body: Center(
-        child: Column(children: [
-          // Text('activo $boton_activo fijo $boton_activo_fijo'),
-          Text(
-              'Nivel: ${nivel.value == 1 ? 'Fácil' : nivel.value == 2 ? 'Intermedio' : 'Duro'}',
-              style: const TextStyle(fontSize: 20)),
-          Text(returnFormattedText(),
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
+          child: Container(
+              decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [
+                  Colors.blue,
+                  Colors.white,
+                ],
               )),
-          if (terminado) ...[
-            const Padding(
-              padding: EdgeInsets.all(10),
-              child: Text('Felicidades!!!', style: TextStyle(fontSize: 30)),
-            ),
-          ],
-          if (isLoading) ...[
-            const SizedBox(
-                height: 350,
-                width: 350,
-                child: Padding(
-                  padding: EdgeInsets.all(100),
-                  child: CircularProgressIndicator(),
-                ))
-          ] else ...[
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: tablero(),
-            ),
-            botones()
-          ],
-          const SizedBox(height: 20),
-          opciones(),
-        ]),
-      ),
+              child: Center(
+                child: Column(children: [
+                  // Text('activo $boton_activo fijo $boton_activo_fijo'),
+                  Text(
+                      'Nivel: ${nivel.value == 1 ? 'Fácil' : nivel.value == 2 ? 'Intermedio' : 'Duro'}',
+                      style: const TextStyle(fontSize: 20)),
+                  Text(returnFormattedText(),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  if (terminado) ...[
+                    const Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text('Felicidades!!!',
+                          style: TextStyle(fontSize: 30)),
+                    ),
+                  ],
+                  if (isLoading) ...[
+                    const SizedBox(
+                        height: 350,
+                        width: 350,
+                        child: Padding(
+                          padding: EdgeInsets.all(100),
+                          child: CircularProgressIndicator(),
+                        ))
+                  ] else ...[
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: tablero(),
+                    ),
+                    botones()
+                  ],
+                  const SizedBox(height: 20),
+                  opciones(),
+                ]),
+              ))),
     );
   }
 
@@ -231,9 +245,9 @@ class SudokuState extends State<Sudoku> {
                     if (!terminado) {
                       if (celdas_ocultas.contains(i * 10 + j)) {
                         setState(() {
-                          numeros[i * 10 + j] = boton_activo;
+                          numeros[i * 10 + j] = borrando ? 0 : boton_activo;
+                          terminado = checkCompleto();
                         });
-                        checkCompleto();
                       }
                     }
                   },
@@ -261,11 +275,16 @@ class SudokuState extends State<Sudoku> {
                                       : numeros[i * 10 + j] == boton_activo_fijo
                                           ? FontWeight.bold
                                           : FontWeight.normal,
-                                  color: celdas_ocultas.contains(i * 10 + j)
-                                      ? const Color.fromARGB(255, 128, 250, 133)
-                                      : numeros[i * 10 + j] == boton_activo_fijo
-                                          ? Colors.white
-                                          : Colors.black)))),
+                                  color: correcto[i * 10 + j] !=
+                                          numeros[i * 10 + j]
+                                      ? Colors.red
+                                      : celdas_ocultas.contains(i * 10 + j)
+                                          ? const Color.fromARGB(
+                                              255, 128, 250, 133)
+                                          : numeros[i * 10 + j] ==
+                                                  boton_activo_fijo
+                                              ? Colors.white
+                                              : Colors.black)))),
                 ),
               ),
             ]
@@ -361,9 +380,9 @@ class SudokuState extends State<Sudoku> {
           },
         ),
         IconButton(
-          style: const ButtonStyle(
+          style: ButtonStyle(
               backgroundColor: WidgetStatePropertyAll<Color>(
-            colorBotones,
+            en_pausa ? Colors.green : colorBotones,
           )),
           icon: Icon(en_pausa ? Icons.play_arrow : Icons.pause),
           onPressed: () async {
@@ -374,6 +393,18 @@ class SudokuState extends State<Sudoku> {
             }
             setState(() {
               en_pausa = !en_pausa;
+            });
+          },
+        ),
+        IconButton(
+          style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll<Color>(
+            borrando ? Colors.green : colorBotones,
+          )),
+          icon: Icon(Icons.edit_off),
+          onPressed: () async {
+            setState(() {
+              borrando = !borrando;
             });
           },
         )
@@ -405,7 +436,9 @@ class SudokuState extends State<Sudoku> {
       }
     }
     stopwatch.reset();
-
+    setState(() {
+      correcto = new Map.from(numeros);
+    });
     //genera array de celdas fijas
     List<int> todos = [
       0,
@@ -610,23 +643,36 @@ class SudokuState extends State<Sudoku> {
     }
   }
 
-  void checkCompleto() {
+  bool checkCompleto() {
+    print(correcto);
     if (!stopwatch.isRunning) {
       stopwatch.start();
     }
 
-    bool ok = true;
     for (int i in numeros.keys) {
       if (numeros[i] == 0) {
-        ok = false;
+        return false;
       }
     }
-    if (ok) {
-      stopwatch.stop();
+
+    for (int i = 1; i < 10; i++) {
+      for (int j = 1; j < 10; j++) {
+        if (!validaFila(i, j)) {
+          return false;
+        }
+      }
     }
-    setState(() {
-      terminado = ok;
-    });
+    for (int i = 1; i < 10; i++) {
+      for (int j = 1; j < 10; j++) {
+        if (!validaColumna(i, j)) {
+          return false;
+        }
+      }
+    }
+
+    stopwatch.stop();
+
+    return true;
   }
 
   //funciones temporizador

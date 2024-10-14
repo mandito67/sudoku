@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
             end: Alignment.bottomLeft,
             colors: [
               Colors.blue,
-              Colors.red,
+              Colors.white,
             ],
           )),
           child: Center(
