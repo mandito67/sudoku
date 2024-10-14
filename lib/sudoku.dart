@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
@@ -165,13 +164,13 @@ class SudokuState extends State<Sudoku> {
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
                       )),
-                  if (terminado) ...[
+                  if (terminado)
                     const Padding(
                       padding: EdgeInsets.all(10),
                       child: Text('Felicidades!!!',
                           style: TextStyle(fontSize: 30)),
                     ),
-                  ],
+
                   if (isLoading) ...[
                     const SizedBox(
                         height: 350,
@@ -423,7 +422,6 @@ class SudokuState extends State<Sudoku> {
 
   Future<void> cargarNumeros() async {
     while (!tablero_ok) {
-      print("intentos: $intentos");
       generaDiagonal();
       setState(() {
         tablero_ok = resolverSudoku();
@@ -525,11 +523,11 @@ class SudokuState extends State<Sudoku> {
     ]..shuffle();
     List<int> celhid = [];
     if (nivel.value == 1) {
-      celhid = todos.sublist(0, 20);
+      celhid = todos.sublist(0, 20); //61 pistas
     } else if (nivel.value == 2) {
-      celhid = todos.sublist(0, 30);
+      celhid = todos.sublist(0, 30); //51 pistas
     } else if (nivel.value == 3) {
-      celhid = todos.sublist(0, 40);
+      celhid = todos.sublist(0, 50); //31 pistas
     }
     celhid.forEach((co) {
       numeros[co] = 0;
@@ -542,7 +540,6 @@ class SudokuState extends State<Sudoku> {
   }
 
   void generaDiagonal() {
-    List<int> base = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     List<int> q1 = [0, 1, 2, 10, 11, 12, 20, 21, 22];
     List<int> q2 = [3, 4, 5, 13, 14, 15, 23, 24, 25];
     List<int> q3 = [6, 7, 8, 16, 17, 18, 26, 27, 28];
@@ -552,7 +549,6 @@ class SudokuState extends State<Sudoku> {
     List<int> q7 = [60, 61, 62, 70, 71, 72, 80, 81, 82];
     List<int> q8 = [63, 64, 65, 73, 74, 75, 83, 84, 85];
     List<int> q9 = [66, 67, 68, 76, 77, 78, 86, 87, 88];
-    Random random = Random();
 
     //genera aleatorio de los 3 cuadrantes de la diagonal
     q1.shuffle();
@@ -574,7 +570,6 @@ class SudokuState extends State<Sudoku> {
       numeros[q7[i - 1]] = 0;
       numeros[q8[i - 1]] = 0;
     }
-    print(numeros);
   }
 
   bool resolverSudoku() {
@@ -587,18 +582,15 @@ class SudokuState extends State<Sudoku> {
                 validarCuadrante(i, j, k)) {
               numeros[i * 10 + j] = k;
               if (resolverSudoku()) {
-                print(numeros);
                 return true;
               }
               numeros[i * 10 + j] = 0;
             }
           }
-          print(numeros);
           return false;
         }
       }
     }
-    print(numeros);
     return true;
   }
 
@@ -644,29 +636,40 @@ class SudokuState extends State<Sudoku> {
   }
 
   bool checkCompleto() {
-    print(correcto);
+    print('checkCompleto');
     if (!stopwatch.isRunning) {
       stopwatch.start();
     }
-
     for (int i in numeros.keys) {
       if (numeros[i] == 0) {
+        print(i);
         return false;
       }
     }
+    print('celdas llenas');
 
-    for (int i = 1; i < 10; i++) {
-      for (int j = 1; j < 10; j++) {
-        if (!validaFila(i, j)) {
-          return false;
-        }
+    for (int fil = 0; fil < 9; fil++) {
+      List<int> check_filas = [];
+      for (int col = 0; col < 9; col++) {
+        check_filas.add(numeros[fil * 10 + col]!);
+      }
+      List<int> check_filas_llenas = List.from(check_filas);
+      check_filas_llenas.remove(0);
+      if (check_filas.length != check_filas_llenas.length) {
+        print('filas no iguales');
+        return false;
       }
     }
-    for (int i = 1; i < 10; i++) {
-      for (int j = 1; j < 10; j++) {
-        if (!validaColumna(i, j)) {
-          return false;
-        }
+    for (int fil = 0; fil < 9; fil++) {
+      List<int> check_cols = [];
+      for (int col = 0; col < 9; col++) {
+        check_cols.add(numeros[fil + col * 10]!);
+      }
+      List<int> check_cols_llenas = List.from(check_cols);
+      check_cols_llenas.remove(0);
+      if (check_cols.length != check_cols_llenas.length) {
+        print('columnas no iguales');
+        return false;
       }
     }
 
