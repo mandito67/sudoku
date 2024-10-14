@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -11,15 +12,16 @@ class Sudoku extends StatefulWidget {
 
 const cellRed = Color(0xffc73232);
 const cellMustard = Color(0xffd7aa22);
-const cellGreyLight = Color(0xffcfd4e0);
-const cellGreyDark = Color.fromARGB(255, 129, 131, 134);
+const cellGreyLight = Color.fromARGB(255, 157, 162, 172);
+const cellGreyDark = Color.fromARGB(255, 98, 100, 103);
 const cellBlue = Color(0xff1553be);
 const background = Color.fromARGB(255, 139, 139, 139);
 
 class SudokuState extends State<Sudoku> {
-  int timer = 0;
   bool isLoading = true;
   ValueNotifier<int> nivel = ValueNotifier<int>(0);
+  late Stopwatch stopwatch;
+  late Timer t;
 
   Map<int, int> numeros = {
     0: 0,
@@ -115,6 +117,16 @@ class SudokuState extends State<Sudoku> {
   void initState() {
     super.initState();
     nivel.addListener(() async => cargarNumeros());
+    stopwatch = Stopwatch();
+    t = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    t.cancel();
+    super.dispose();
   }
 
   @override
@@ -128,10 +140,16 @@ class SudokuState extends State<Sudoku> {
       ),
       body: Center(
         child: Column(children: [
-          Text('activo $boton_activo fijo $boton_activo_fijo'),
+          // Text('activo $boton_activo fijo $boton_activo_fijo'),
           Text(
               'Nivel: ${nivel.value == 1 ? 'Fácil' : nivel.value == 2 ? 'Intermedio' : 'Duro'}',
               style: const TextStyle(fontSize: 20)),
+          Text(returnFormattedText(),
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+              )),
           if (terminado) ...[
             const Padding(
               padding: EdgeInsets.all(20),
@@ -331,11 +349,17 @@ class SudokuState extends State<Sudoku> {
     );
   }
 
-  Future<void> cargarNumeros() async {
-    intentos = 0;
+  Widget temporizador() {
+    return Text(returnFormattedText(),
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 40,
+          fontWeight: FontWeight.bold,
+        ));
+  }
 
+  Future<void> cargarNumeros() async {
     while (!tablero_ok) {
-      intentos++;
       print("intentos: $intentos");
       generaDiagonal();
       setState(() {
@@ -348,7 +372,7 @@ class SudokuState extends State<Sudoku> {
         break;
       }
     }
-    print("total intentos: $intentos");
+    stopwatch.reset();
 
     //genera array de celdas fijas
     List<int> todos = [
@@ -555,15 +579,43 @@ class SudokuState extends State<Sudoku> {
   }
 
   void checkCompleto() {
-    print('validnado...');
+    if (!stopwatch.isRunning) {
+      stopwatch.start();
+    }
+
     bool ok = true;
     for (int i in numeros.keys) {
       if (numeros[i] == 0) {
         ok = false;
       }
     }
+    if (ok) {
+      stopwatch.stop();
+    }
     setState(() {
       terminado = ok;
     });
+  }
+
+  //funciones temporizador
+  void handleStartStop() {
+    if (stopwatch.isRunning) {
+      stopwatch.stop();
+    } else {
+      stopwatch.start();
+    }
+  }
+
+  String returnFormattedText() {
+    var milli = stopwatch.elapsed.inMilliseconds;
+
+    String seconds = ((milli ~/ 1000) % 60)
+        .toString()
+        .padLeft(2, "0"); // this is for the second
+    String minutes = ((milli ~/ 1000) ~/ 60)
+        .toString()
+        .padLeft(2, "0"); // this is for the minute
+
+    return "$minutes:$seconds";
   }
 }
