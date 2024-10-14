@@ -208,11 +208,13 @@ class SudokuState extends State<Sudoku> {
               gridArea('c$i$j').containing(
                 GestureDetector(
                   onTap: () {
-                    if (celdas_ocultas.contains(i * 10 + j)) {
-                      setState(() {
-                        numeros[i * 10 + j] = boton_activo;
-                      });
-                      checkCompleto();
+                    if (!terminado) {
+                      if (celdas_ocultas.contains(i * 10 + j)) {
+                        setState(() {
+                          numeros[i * 10 + j] = boton_activo;
+                        });
+                        checkCompleto();
+                      }
                     }
                   },
                   child: Container(
@@ -554,15 +556,14 @@ class SudokuState extends State<Sudoku> {
 
   void checkCompleto() {
     print('validnado...');
+    bool ok = true;
     for (int i in numeros.keys) {
       if (numeros[i] == 0) {
-        setState(() {
-          terminado = false;
-        });
+        ok = false;
       }
     }
     setState(() {
-      terminado = true;
+      terminado = ok;
     });
   }
 }
