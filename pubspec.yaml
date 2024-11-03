@@ -38,10 +38,10 @@ dependencies:
   flutter_layout_grid: ^2.0.7
   flutter_launcher_icons: ^0.14.1
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icono.png"
+  image_path: "assets/sudoku.jpg"
 dev_dependencies:
   flutter_test:
     sdk: flutter

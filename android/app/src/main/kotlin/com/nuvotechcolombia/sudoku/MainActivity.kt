@@ -1,4 +1,4 @@
-package com.example.sudoku
+package com.nuvotechcolombia.sudoku
 
 import io.flutter.embedding.android.FlutterActivity
 

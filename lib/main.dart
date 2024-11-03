@@ -6,7 +6,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,14 +17,13 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        home: const MyHomePage(title: 'Sudoku'),
-        initialRoute: "/",
+        initialRoute: "/nivel",
         routes: {
           "/sudoku": (BuildContext context) {
             return Sudoku();
           },
           "/nivel": (BuildContext context) {
-            return Sudoku();
+            return SeleccionNivel();
           },
           "/configuracion": (BuildContext context) {
             return Sudoku();
@@ -33,21 +32,21 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+class SeleccionNivel extends StatefulWidget {
+  const SeleccionNivel({Key? key}) : super(key: key);
+
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<SeleccionNivel> createState() => SeleccionNivelState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class SeleccionNivelState extends State<SeleccionNivel> {
   @override
   int nivel = 1;
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: const Text('Sudoku only fun!'),
       ),
       body: Center(
         child: Container(

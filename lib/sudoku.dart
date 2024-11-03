@@ -420,7 +420,7 @@ class SudokuState extends State<Sudoku> {
               backgroundColor: WidgetStatePropertyAll<Color>(
             borrando ? Colors.green : colorBotones,
           )),
-          icon: Icon(Icons.edit_off),
+          icon: Icon(borrando ? Icons.edit : Icons.edit_off),
           onPressed: () async {
             setState(() {
               borrando = !borrando;
@@ -433,7 +433,7 @@ class SudokuState extends State<Sudoku> {
 
   Widget temporizador() {
     return Text(returnFormattedText(),
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.black,
           fontSize: 40,
           fontWeight: FontWeight.bold,
